@@ -33,7 +33,7 @@ namespace Multithread_producer_consumer_opgave
                 {
                     products.Dequeue();
                     Console.WriteLine("Consumer har consumeret " + " - Queue count is " + products.Count);
-                }
+                } 
                 else
                 {
                     Console.WriteLine("Consumer kan ikke consumere " + " - Queue count is " + products.Count);
