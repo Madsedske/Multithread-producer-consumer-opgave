@@ -30,16 +30,15 @@ namespace Multithread_producer_consumer_udvidet_opgave
         {
             while (true)
             {
-                lock (products)
+                Monitor.Enter(products);
+                while (products.Count == 0)
                 {
-                    while (products.Count == 0)
-                    {
-                        Monitor.Wait(products);
-                    }
-                    products.Dequeue();
-                    Console.WriteLine("Consumer har consumeret " + " - Queue count is " + products.Count);
-
+                    Monitor.Wait(products);
                 }
+                products.Dequeue();
+                Console.WriteLine("Consumer har consumeret " + " - Queue count is " + products.Count);
+
+                Monitor.Exit(products);
             }
         }
 
@@ -47,23 +46,26 @@ namespace Multithread_producer_consumer_udvidet_opgave
         {
             while (true)
             {
-                lock (products)
-                {
-                    if (products.Count < 3)
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            products.Enqueue(1);
-                            Console.WriteLine("Producer har produceret " + " - Queue count is " + products.Count);
-                        }
-                        
+                Monitor.Enter(products);
 
+                if (products.Count < 3)
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        products.Enqueue(1);
+                        Console.WriteLine("Producer har produceret " + " - Queue count is " + products.Count);
                     }
-                    else if (products.Count == 3)
-                        Console.WriteLine("Producer venter..");
-                    Monitor.PulseAll(products);
+
+                  
+
+
 
                 }
+                else if (products.Count == 3)
+                    Console.WriteLine("Producer venter..");
+                Monitor.PulseAll(products);
+                Monitor.Exit(products);
+
             }
         }
     }
