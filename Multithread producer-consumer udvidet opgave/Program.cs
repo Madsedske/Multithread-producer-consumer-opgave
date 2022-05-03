@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Multithread_producer_consumer_opgave
+namespace Multithread_producer_consumer_udvidet_opgave
 {
     internal class Program
     {
+        static object _lock = new object();
         static Random r = new Random();
         static Queue<int> products = new Queue<int>();
 
@@ -25,51 +26,50 @@ namespace Multithread_producer_consumer_opgave
 
         }
 
+
+        static void KeepRunning()
+        {
+
+        }
+
+
         static void Consumer()
         {
-            int count1 = 0;
             while (true)
             {
+                Monitor.Enter(products);
+
                 if (products.Count >= 1)
                 {
-                    count1 = 0;
+                    Monitor.Wait(products);
                     products.Dequeue();
                     Console.WriteLine("Consumer har consumeret " + " - Queue count is " + products.Count);
-                } 
-                else if (count1 < 8)
-                {
-                    count1++;
-                    Console.WriteLine("Consumer kan ikke consumere " + " - Queue count is " + products.Count);
+                    Monitor.Exit(products);
                 }
                 else
                 {
-                    Thread.Sleep(1500);
+                    Console.WriteLine("Consumer kan ikke consumere " + " - Queue count is " + products.Count);
                 }
             }
         }
 
         static void Producer()
         {
-            int count1 = 0;
             while (true)
             {
+                Monitor.Enter(products);
+
                 if (products.Count < 3)
                 {
-                    count1 = 0;
                     products.Enqueue(1);
+                    Monitor.PulseAll(products);
                     Console.WriteLine("Producer har produceret " + " - Queue count is " + products.Count);
-                }
-
-                else if (count1 < 8)
-                {
-                    count1++;
-                    Console.WriteLine("Producer kan ikke producere " + " - Queue count is " + products.Count);
+                    Monitor.Exit(products);
                 }
                 else
                 {
-                    Thread.Sleep(1500);
+                    Console.WriteLine("Producer kan ikke producere " + " - Queue count is " + products.Count);
                 }
-
             }
         }
     }
