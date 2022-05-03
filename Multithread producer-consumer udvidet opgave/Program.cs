@@ -26,29 +26,19 @@ namespace Multithread_producer_consumer_udvidet_opgave
 
         }
 
-
-        static void KeepRunning()
-        {
-
-        }
-
-
         static void Consumer()
         {
             while (true)
             {
-                Monitor.Enter(products);
-
-                if (products.Count >= 1)
+                lock (products)
                 {
-                    Monitor.Wait(products);
+                    while (products.Count == 0)
+                    {
+                        Monitor.Wait(products);
+                    }
                     products.Dequeue();
                     Console.WriteLine("Consumer har consumeret " + " - Queue count is " + products.Count);
-                    Monitor.Exit(products);
-                }
-                else
-                {
-                    Console.WriteLine("Consumer kan ikke consumere " + " - Queue count is " + products.Count);
+
                 }
             }
         }
@@ -57,18 +47,22 @@ namespace Multithread_producer_consumer_udvidet_opgave
         {
             while (true)
             {
-                Monitor.Enter(products);
+                lock (products)
+                {
+                    if (products.Count < 3)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            products.Enqueue(1);
+                            Console.WriteLine("Producer har produceret " + " - Queue count is " + products.Count);
+                        }
+                        
 
-                if (products.Count < 3)
-                {
-                    products.Enqueue(1);
+                    }
+                    else if (products.Count == 3)
+                        Console.WriteLine("Producer venter..");
                     Monitor.PulseAll(products);
-                    Console.WriteLine("Producer har produceret " + " - Queue count is " + products.Count);
-                    Monitor.Exit(products);
-                }
-                else
-                {
-                    Console.WriteLine("Producer kan ikke producere " + " - Queue count is " + products.Count);
+
                 }
             }
         }
